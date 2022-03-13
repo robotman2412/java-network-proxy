@@ -1,24 +1,13 @@
 package net.scheffers.robot.proxy;
 
-import net.scheffers.robot.mcchat.ProxyMessage;
-import net.scheffers.robot.proxy.config.ProxyConfig;
-import net.scheffers.robot.proxy.config.ProxyPeer;
-import net.scheffers.robot.proxy.connection.IncomingProxyClient;
-import net.scheffers.robot.proxy.connection.OutgoingProxyClient;
-import net.scheffers.robot.proxy.connection.ProxyClosedException;
+import net.scheffers.robot.proxy.config.*;
+import net.scheffers.robot.proxy.connection.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
 
 /** 
  * Handles communication between both sides of a proxy.
@@ -223,13 +212,15 @@ public class Proxy<MessageType> {
 	}
 	
 	/** Send event stub. */
-	public void send(ProxyMessage message) {
-		message.serverId = id;
+	public void send(MessageType message) {
 		String text = message.toString();
 		if (doExtensiveLogging) {
 			System.out.println("Send proxy:\n" + text);
 		}
 		for (OutgoingProxyClient outgoing : outgoingClients) {
+			if (message instanceof ProxySendAction) {
+				((ProxySendAction) message).onSendTo(this, outgoing);
+			}
 			outgoing.send(text);
 		}
 	}
