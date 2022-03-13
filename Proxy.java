@@ -213,15 +213,14 @@ public class Proxy<MessageType> {
 	
 	/** Send event stub. */
 	public void send(MessageType message) {
-		String text = message.toString();
 		if (doExtensiveLogging) {
-			System.out.println("Send proxy:\n" + text);
+			System.out.println("Send proxy:\n" + message);
 		}
 		for (OutgoingProxyClient outgoing : outgoingClients) {
 			if (message instanceof ProxySendAction) {
 				((ProxySendAction) message).onSendTo(this, outgoing);
 			}
-			outgoing.send(text);
+			outgoing.send(message.toString());
 		}
 	}
 	
