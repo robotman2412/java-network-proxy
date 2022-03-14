@@ -17,7 +17,7 @@ public class OutgoingProxyClient extends ProxyClient {
 	
 	protected Queue<TimestampedMessage> sendQueue;
 	
-	public OutgoingProxyClient(Proxy parent, String host, int port) {
+	public OutgoingProxyClient(Proxy<?> parent, String host, int port) {
 		this.parent = parent;
 		this.host = host;
 		this.port = port;

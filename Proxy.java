@@ -42,12 +42,18 @@ public class Proxy<MessageType> {
 	protected List<Consumer<MessageType>> handlers;
 	
 	protected Thread worker;
+	protected Function<MessageType, String> serialiser;
 	protected Function<String, MessageType> deserialiser;
 	
 	public File configFile;
 	public ProxyConfig config;
 	
 	public Proxy(Function<String, MessageType> deserialiser) {
+		this(MessageType::toString, deserialiser);
+	}
+	
+	public Proxy(Function<MessageType, String> serialiser, Function<String, MessageType> deserialiser) {
+		this.serialiser = serialiser;
 		this.deserialiser = deserialiser;
 		handlers = new ArrayList<>();
 		incomingClients = new ArrayList<>();
@@ -220,7 +226,7 @@ public class Proxy<MessageType> {
 			if (message instanceof ProxySendAction) {
 				((ProxySendAction) message).onSendTo(this, outgoing);
 			}
-			outgoing.send(message.toString());
+			outgoing.send(serialiser.apply(message));
 		}
 	}
 	

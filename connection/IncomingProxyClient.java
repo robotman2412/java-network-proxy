@@ -4,16 +4,17 @@ import net.scheffers.robot.proxy.Proxy;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class IncomingProxyClient extends ProxyClient {
 	
 	protected boolean isReading;
-	protected StringBuffer inputBuffer;
+	protected ByteArrayOutputStream inputBuffer;
 	
-	public IncomingProxyClient(Proxy parent, Socket socket) throws IOException {
+	public IncomingProxyClient(Proxy<?> parent, Socket socket) throws IOException {
 		this.parent = parent;
 		setSocket(socket, System.currentTimeMillis());
-		inputBuffer = new StringBuffer();
+		inputBuffer = new ByteArrayOutputStream();
 	}
 	
 	public void handle() throws IOException {
@@ -39,15 +40,15 @@ public class IncomingProxyClient extends ProxyClient {
 				} else if (val == 2) {
 					// Well oops.
 					// Empty the buffer.
-					inputBuffer = new StringBuffer();
+					inputBuffer = new ByteArrayOutputStream();
 				} else if (val == 3) {
 					// Trigger the receive logic.
 					isReading = false;
-					handleRawMessage(inputBuffer.toString());
+					handleRawMessage(inputBuffer.toString(StandardCharsets.UTF_8));
 					break;
 				} else {
 					// Buffer the incoming data.
-					inputBuffer.append((char) val);
+					inputBuffer.write((byte) val);
 				}
 				available = input.available();
 			}
@@ -69,7 +70,7 @@ public class IncomingProxyClient extends ProxyClient {
 				} else if (val == 2) {
 					// Trigger the reading logic.
 					isReading = true;
-					inputBuffer = new StringBuffer();
+					inputBuffer = new ByteArrayOutputStream();
 					break;
 				}
 				available = input.available();
